@@ -169,11 +169,10 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
-<<<<<<< HEAD
-
 
 node_modules/
 dist/
-=======
+
 powerpoints/~$Challenge.pptx
->>>>>>> origin/main
+
+node_modules/
