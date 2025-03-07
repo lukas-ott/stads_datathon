@@ -108,7 +108,7 @@ anomaly_categories = {
             "WAERS is not C1 to C9"
         ]
     },
-        "WRBTR": {
+    "WRBTR": {
         "name": "WRBTR ist is in anomaly interval",
         "explanation": "WRBTR is in one of two intervals with mostly anomalies",
         "detection_metrics": [
@@ -117,6 +117,30 @@ anomaly_categories = {
         ]
     }
 }
+
+
+def calculate_overall_conditional_probability(detected_sub_anomalies, df):
+    # input is a df containing the columns as keys where the value of the data point is suspicious
+    # init mask with True and the lenght of the df
+    mask = df.index = df.index
+    if 'BSCHL' in detected_sub_anomalies.keys():
+        mask &= ~df['BSCHL'].isin(["A1", "A2", "A3"])
+    if 'BUKRS' in detected_sub_anomalies.keys():
+        mask &= ~df['BSCHL'].str.startswith('C')
+    if 'DMBTR' in detected_sub_anomalies.keys():
+        mask &= (df['DMBTR'] > 90E6) | (9106E2 <= df['DMBTR'] <= 9107E2)
+    if 'PRCTR' in detected_sub_anomalies.keys():
+        mask &= ~df['PRCTR'].str.startswith('C')        
+    if 'KTOSL' in detected_sub_anomalies.keys():
+        mask &= ~df['KTOSL'].isin([f"C{i}" for i in range(1, 10)])
+    if 'BSCHL' in detected_sub_anomalies.keys():
+        mask &= ~df['BSCHL'].isin(["B1", "B2", "B3"])
+    if 'WAERS' in detected_sub_anomalies.keys():
+        mask &= ~df['WAERS'].isin([f"C{i}" for i in range(1, 10)])
+    if 'WRBTR' in detected_sub_anomalies.keys():
+        mask &= (df['WRBTR'] > 5.9E7) | (544E2 <= df['DMBTR'] <= 545E2)
+    
+    return len(df.loc[mask, 'anomal']) / len(df.loc[mask])
 
 
 def categorize_anomalies(anomaly: pd.DataFrame) -> str:
