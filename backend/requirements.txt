@@ -21,3 +21,7 @@ notebook==7.1.2
 # Environment Management
 python-dotenv==1.0.1
 ipykernel==6.29.3
+
+
+fastapi
+uvicorn

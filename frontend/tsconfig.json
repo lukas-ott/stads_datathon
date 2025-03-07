@@ -1,15 +1,15 @@
 {
-    "compilerOptions": {
-      "lib": ["es6", "dom"],
-      "module": "commonjs",
-      "target": "es6",
-      "outDir": "./dist",
-      "rootDir": "./source",
-      "strict": true,
-      "esModuleInterop": true,
-      "skipLibCheck": true,
-      "forceConsistentCasingInFileNames": true
-    },
-    "include": ["source/**/*"],
-    "exclude": ["node_modules", "**/*.spec.ts"]
+  "compilerOptions": {
+    "lib": ["es6", "dom"],
+    "module": "commonjs",
+    "target": "es6",
+    "outDir": "./dist",
+    "rootDir": "./",  // Change rootDir to the root folder
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["script.ts"],
+  "exclude": ["node_modules", "**/*.spec.ts"]
 }
