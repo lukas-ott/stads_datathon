@@ -61,16 +61,8 @@ anomaly_categories = {
 }
 
 
-def categorize_anomalies(anomalie: pd.DataFrame) -> str:
+def categorize_anomalies(anomaly: pd.DataFrame) -> str:
     """
     Categorize anomalies based on their characteristics and detection metrics
     """
-    categories = []
-    for category, details in anomaly_categories.items():
-        for metric in details["detection_metrics"]:
-            if metric in anomalie.columns:
-                categories.append(details["name"])
-                break
-    if not categories:
-        return "Uncategorized"
-    return ", ".join(categories)
+    return NotImplementedError
