@@ -10,8 +10,11 @@ COPY . .
 # Installiere die Abhängigkeiten
 RUN npm install
 
+# Installiere http-server global
+RUN npm install -g http-server
+
 # Exponiere den Port
 EXPOSE 8080
 
 # Starte den HTTP-Server
-CMD ["npm", "start"]
+CMD ["http-server", "-p", "8080"]
