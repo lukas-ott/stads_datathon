@@ -175,4 +175,8 @@ dist/
 
 powerpoints/~$Challenge.pptx
 
+
 node_modules/
+
+
+.env.local
