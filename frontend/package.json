@@ -1,11 +1,10 @@
 {
-    "name": "meine-web-app",
-    "version": "1.0.0",
-    "scripts": {
-      "start": "http-server -p 8080"
-    },
-    "dependencies": {
-      "http-server": "^14.1.1"
-    }
+  "name": "frontend",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "concurrently \"tsc --watch\" \"http-server .\" \"PYTHONPATH=../ uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000\""
+  },
+  "devDependencies": {
+    "concurrently": "^7.0.0"
   }
-  
+}

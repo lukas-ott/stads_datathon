@@ -3,14 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anomalie-Erklärer</title>
+    <title>Audit Anomaly Insights</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Anomalie-Erklärer</h1>
-    <label for="anomalySelect">Wähle eine Anomalie:</label>
-    <select id="anomalySelect"></select>
-    <div id="explanation"></div>
-    <script src="script.js"></script>
+    <div class="container">
+        <h1>Audit Anomaly Insights</h1>
+
+        <div class="input-section">
+            <label for="csvInput">Buchungsdaten eingeben (CSV-Format):</label>
+            <input type="text" id="csvInput" placeholder="BELNR,BUKRS,BSCHL,HKONT,PRCTR,WAERS,KTOSL,DMBTR,WRBTR">
+            <button id="processBtn">Analysieren</button>
+        </div>
+
+        <div class="explanation-section">
+            <h2>Erklärung</h2>
+            <textarea id="explanation" readonly></textarea>
+        </div>
+
+        <div class="visual-section">
+            <h2>Visuelle Analyse</h2>
+            <div id="chartContainer">[Diagramm wird hier generiert]</div>
+        </div>
+    </div>
+
+    <script src="dist/script.js"></script>
 </body>
 </html>
