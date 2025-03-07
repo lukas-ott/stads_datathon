@@ -1,0 +1,32 @@
+# Core Libraries
+numpy==1.26.4
+pandas==2.2.1
+scipy==1.11.4
+
+# Visualization
+matplotlib==3.8.2
+seaborn==0.13.2
+plotly==5.19.0
+
+# Machine Learning
+scikit-learn==1.4.1.post1
+xgboost==2.0.3
+lightgbm==4.2.0
+catboost==1.2.3
+
+# Data Processing
+beautifulsoup4==4.12.3
+lxml==5.1.0
+openpyxl==3.1.2
+
+# Jupyter and Interactive Tools
+jupyterlab==4.1.5
+ipython==8.22.2
+notebook==7.1.2
+
+# Miscellaneous
+tqdm==4.66.2
+requests==2.31.0
+
+# Environment Management
+python-dotenv==1.0.1
