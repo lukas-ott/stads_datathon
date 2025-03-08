@@ -1,8 +1,12 @@
+import math
 import anomaly_categorization
 import pandas as pd
 import csv
 import matplotlib.pyplot as plt
 import seaborn as sns
+import numpy as np
+import scipy.stats as stats
+import io
 
 
 class AnomalyReasoner:
@@ -16,28 +20,28 @@ class AnomalyReasoner:
         reasons = {}
         waers = self._check_WAERS(anomaly[1])
         if waers:
-            reasons[waers[0]] = waers[1]
+            reasons[waers[0]] = (waers[1], None)
         bukrs = self._check_BUKRS(anomaly[2])
         if bukrs:
-            reasons[bukrs[0]] = bukrs[1]
+            reasons[bukrs[0]] = (bukrs[1], None)
         ktosl = self._check_KTOSL(anomaly[3])
         if ktosl:
-            reasons[ktosl[0]] = ktosl[1]
+            reasons[ktosl[0]] = (ktosl[1], None)
         prctr = self._check_PRCTR(anomaly[4])
         if prctr:
-            reasons[prctr[0]] = prctr[1]
+            reasons[prctr[0]] = (prctr[1], None)
         bschl = self._check_BSCHL(anomaly[5])
         if bschl:
-            reasons[bschl[0]] = bschl[1]
+            reasons[bschl[0]] = (bschl[1], None)
         hkont = self._check_HKONT(anomaly[6])
         if hkont:
-            reasons[hkont[0]] = hkont[1]
+            reasons[hkont[0]] = (hkont[1], None)
         dmbtr = self._check_DMBTR(anomaly[7])
         if dmbtr:
-            reasons[dmbtr[0]] = dmbtr[1]
+            reasons[dmbtr[0]] = (dmbtr[1], dmbtr[2])
         wrbtr = self._check_WRBTR(anomaly[8])
         if wrbtr:
-            reasons[wrbtr[0]] = wrbtr[1]
+            reasons[wrbtr[0]] = (wrbtr[1], wrbtr[2])
 
         return reasons
     
@@ -50,8 +54,10 @@ class AnomalyReasoner:
             mask &= ~df['BSCHL'].isin(["A1", "A2", "A3"])
         if 'BUKRS' in detected_sub_anomalies.keys():
             mask &= ~df['BUKRS'].str.startswith('C')
-        if 'DMBTR' in detected_sub_anomalies.keys():
-            mask &= (df['DMBTR'] > 90E6) | ((9106E2 < df['DMBTR']) & (df['DMBTR'] < 9107E2))
+        if 'DMBTR_L' in detected_sub_anomalies.keys():
+            mask &= (9106E2 < df['DMBTR']) & (df['DMBTR'] < 9107E2)
+        if 'DMBTR_H' in detected_sub_anomalies.keys():
+            mask &= df['DMBTR'] > 90E6
         if 'PRCTR' in detected_sub_anomalies.keys():
             mask &= ~df['PRCTR'].str.startswith('C') 
         if 'KTOSL' in detected_sub_anomalies.keys():
@@ -60,8 +66,10 @@ class AnomalyReasoner:
             mask &= ~df['HKONT'].isin(["B1", "B2", "B3"])
         if 'WAERS' in detected_sub_anomalies.keys():
             mask &= ~df['WAERS'].isin([f"C{i}" for i in range(1, 10)])
-        if 'WRBTR' in detected_sub_anomalies.keys():
-            mask &= (df['WRBTR'] > 5.9E7) | ((544E2 < df['WRBTR']) & (df['WRBTR'] < 545E2))
+        if 'WRBTR_L' in detected_sub_anomalies.keys():
+            mask &= (544E2 < df['WRBTR']) & (df['WRBTR'] < 545E2)
+        if 'WRBTR_H' in detected_sub_anomalies.keys():
+            mask &= df['WRBTR'] > 5.9E7
 
         if len(df.loc[mask]) == 0:
             return 0
@@ -71,23 +79,35 @@ class AnomalyReasoner:
     def convert_input_string(self, input: str) -> list[str]:
         return input.split(sep=',')
     
-    def calculate_categories(self, input_str: str) -> tuple[dict[str, float], float]:
+    def calculate_categories(self, input_str: str) -> tuple[dict[str, float], float, io.BytesIO | None, io.BytesIO | None, io.BytesIO | None]:
         input_list = reasoner.convert_input_string(input_str)
         d = reasoner.interpret_anomaly(input_list)
         p = reasoner.calculate_overall_conditional_probability(d, self.df)
-        return d, p
+        img_buf_DMBTR = None
+        img_buf_WRBTR = None
+        if 'DMBTR_L' in d.keys():
+            img_buf_DMBTR = d['DMBTR_L'][1]
+        if 'DMBTR_H' in d.keys():
+            img_buf_DMBTR = d['DMBTR_H'][1]
+        if 'WRBTR_L' in d.keys():
+            img_buf_WRBTR = d['WRBTR_L'][1]
+        if 'WRBTR_H' in d.keys():
+            img_buf_WRBTR = d['WRBTR_H'][1]
+        img_buf_hist = reasoner.get_hist_graphic(d)
+        return d, p, img_buf_hist, img_buf_DMBTR, img_buf_WRBTR
     
-    def get_graphic(self, detected_sub_anomalies: dict[str, float]):
+    def get_hist_graphic(self, detected_sub_anomalies: dict[str, float]) -> io.BytesIO:
         max_key = max(detected_sub_anomalies, key=detected_sub_anomalies.get)
-
         mask = self.df.index == self.df.index
 
         if 'BSCHL' == max_key:
             mask = ~self.df['BSCHL'].isin(["A1", "A2", "A3"])
         if 'BUKRS' == max_key:
             mask = ~self.df['BUKRS'].str.startswith('C')
-        if 'DMBTR' == max_key:
-            mask = (self.df['DMBTR'] > 90E6) | ((9106E2 < self.df['DMBTR']) & (self.df['DMBTR'] < 9107E2))
+        if 'DMBTR_L' == max_key:
+            mask = (9106E2 < self.df['DMBTR']) & (self.df['DMBTR'] < 9107E2)
+        if 'DMBTR_H' == max_key:
+            mask = self.df['DMBTR'] > 90E6
         if 'PRCTR' == max_key:
             mask = ~self.df['PRCTR'].str.startswith('C') 
         if 'KTOSL' == max_key:
@@ -96,17 +116,30 @@ class AnomalyReasoner:
             mask = ~self.df['HKONT'].isin(["B1", "B2", "B3"])
         if 'WAERS' == max_key:
             mask = ~self.df['WAERS'].isin([f"C{i}" for i in range(1, 10)])
-        if 'WRBTR' == max_key:
-            mask = (self.df['WRBTR'] > 5.9E7) | ((544E2 < self.df['WRBTR']) & (self.df['WRBTR'] < 545E2))
+        if 'WRBTR_L' == max_key:
+            mask = (544E2 < self.df['WRBTR']) & (self.df['WRBTR'] < 545E2)
+        if 'WRBTR_H' == max_key:
+            mask = self.df['WRBTR'] > 5.9E7
 
-        ax = sns.histplot(self.df.loc[mask], x='label', hue='label_int')
+        fig, ax_hist = plt.subplots(figsize=(5, 5))
+        sns.histplot(self.df.loc[mask], x='label', hue='label_int', legend=False, ax=ax_hist)
+        # ax.set_title(f'Histogram of labels for rows with a possible error the column with largest probability of anomaly.')
         # Add labels to each bar
-        for patch in ax.patches:
+        for patch in ax_hist.patches:
             height = patch.get_height()
             if height > 0:  # Only label non-zero bars
-                ax.text(patch.get_x() + patch.get_width() / 2, height + 1,  # Adjusted position
+                ax_hist.text(patch.get_x() + patch.get_width() / 2, height + 1,  # Adjusted position
                     f'{int(height)}', ha='center', fontsize=10, fontweight='bold')
-        return ax
+        # Remove top and right spines
+        ax_hist.spines['top'].set_visible(False)
+        ax_hist.spines['right'].set_visible(False)
+
+        if 'WRBTR_H' in detected_sub_anomalies.keys():
+            mask = self.df['WRBTR'] > 5.9E7
+        img_buf = io.BytesIO()
+        plt.savefig(img_buf, format='png')
+        plt.close(fig)
+        return img_buf
 
 
     def _check_WAERS(self, WAERS: str) -> tuple[str, float] | None:
@@ -235,10 +268,9 @@ class AnomalyReasoner:
         return None
 
 
-    # TODO: DMBTR1 für unteres Interval und DMBTR2 für oberes
-    def _check_DMBTR(self, DMBTR: str) -> tuple[str, float] | None:
+    def _check_DMBTR(self, DMBTR: str) -> tuple[str, float, io.BytesIO] | None:
         DMBTR = float(DMBTR)
-        if DMBTR > 9E7 or (9106E2 < DMBTR < 9107E2):
+        if (9106E2 < DMBTR < 9107E2):
             with open(self.csv_filename, 'r') as csv_file:
                 rows = csv.reader(csv_file, delimiter=',')
                 iterrows = iter(rows)
@@ -246,21 +278,62 @@ class AnomalyReasoner:
 
                 anomal_counter = 0
                 regular_counter = 0
+                anomalies = []
                 for row in iterrows:
-                    if float(row[7]) > 9E7 or (9106E2 < float(row[7]) < 9107E2):
+                    if (9106E2 < float(row[7]) < 9107E2):
                         if row[9] == "anomal":
                             anomal_counter += 1
+                            anomalies.append(float(row[7]))
                         else:
                             regular_counter += 1
 
                 prob_anomal = anomal_counter / (anomal_counter + regular_counter)
-                return "DMBTR", prob_anomal
+                avg = np.average(anomalies)
+                var = np.var(anomalies)
+                sigma = math.sqrt(var)
+                x = np.linspace(avg - 5 * sigma, avg + 5 * sigma, 100)
+                fig, ax = plt.subplots(figsize=(5, 5))
+                ax.plot(x, stats.norm.pdf(x, avg, sigma))
+                ax.axvline(x=DMBTR, color="r")
+                img_buf = io.BytesIO()
+                plt.savefig(img_buf, format='png')
+                plt.close(fig)
+                return "DMBTR_L", prob_anomal, img_buf
+        if DMBTR > 9E7:
+            with open(self.csv_filename, 'r') as csv_file:
+                rows = csv.reader(csv_file, delimiter=',')
+                iterrows = iter(rows)
+                next(iterrows)
+
+                anomal_counter = 0
+                regular_counter = 0
+                anomalies = []
+                for row in iterrows:
+                    if float(row[7]) > 9E7:
+                        if row[9] == "anomal":
+                            anomal_counter += 1
+                            anomalies.append(float(row[7]))
+                        else:
+                            regular_counter += 1
+
+                prob_anomal = anomal_counter / (anomal_counter + regular_counter)
+                avg = np.average(anomalies)
+                var = np.var(anomalies)
+                sigma = math.sqrt(var)
+                x = np.linspace(avg - 5 * sigma, avg + 5 * sigma, 100)
+                fig, ax = plt.subplots(figsize=(5, 5))
+                ax.plot(x, stats.norm.pdf(x, avg, sigma))
+                ax.axvline(x=DMBTR, color="r")
+                img_buf = io.BytesIO()
+                plt.savefig(img_buf, format='png')
+                plt.close(fig)
+                return "DMBTR_H", prob_anomal, img_buf
         return None
 
-    def _check_WRBTR(self, WRBTR: str) -> tuple[str, float] | None:
+    def _check_WRBTR(self, WRBTR: str) -> tuple[str, float, plt.Axes] | None:
         # TODO differentiate between high values and interval?
         WRBTR = float(WRBTR)
-        if WRBTR > 5.9E7 or (544E2 < WRBTR < 545E2):
+        if (544E2 < WRBTR < 545E2):
             with open(self.csv_filename, 'r') as csv_file:
                 rows = csv.reader(csv_file, delimiter=',')
                 iterrows = iter(rows)
@@ -268,22 +341,63 @@ class AnomalyReasoner:
 
                 anomal_counter = 0
                 regular_counter = 0
+                anomalies = []
                 for row in iterrows:
-                    if float(row[8]) > 5.9E7 or (544E2 < float(row[8]) < 545E2):
+                    if (544E2 < float(row[8]) < 545E2):
                         if row[9] == "anomal":
                             anomal_counter += 1
+                            anomalies.append(float(row[7]))
                         else:
                             regular_counter += 1
 
                 prob_anomal = anomal_counter / (anomal_counter + regular_counter)
-                return "WRBTR", prob_anomal
+                avg = np.average(anomalies)
+                var = np.var(anomalies)
+                sigma = math.sqrt(var)
+                x = np.linspace(avg - 5 * sigma, avg + 5 * sigma, 100)
+                fig, ax = plt.subplots(figsize=(5, 5))
+                ax.plot(x, stats.norm.pdf(x, avg, sigma))
+                ax.axvline(x=WRBTR, color="r")
+                img_buf = io.BytesIO()
+                plt.savefig(img_buf, format='png')
+                plt.close(fig)
+                return "WRBTR_L", prob_anomal, img_buf
+        if WRBTR > 5.9E7:
+            with open(self.csv_filename, 'r') as csv_file:
+                rows = csv.reader(csv_file, delimiter=',')
+                iterrows = iter(rows)
+                next(iterrows)
+
+                anomal_counter = 0
+                regular_counter = 0
+                anomalies = []
+                for row in iterrows:
+                    if float(row[8]) > 5.9E7:
+                        if row[9] == "anomal":
+                            anomal_counter += 1
+                            anomalies.append(float(row[7]))
+                        else:
+                            regular_counter += 1
+
+                prob_anomal = anomal_counter / (anomal_counter + regular_counter)
+                avg = np.average(anomalies)
+                var = np.var(anomalies)
+                sigma = math.sqrt(var)
+                x = np.linspace(avg - 5 * sigma, avg + 5 * sigma, 100)
+                fig, ax = plt.subplots(figsize=(5, 5))
+                ax.plot(x, stats.norm.pdf(x, avg, sigma))
+                ax.axvline(x=WRBTR, color="r")
+                img_buf = io.BytesIO()
+                plt.savefig(img_buf, format='png')
+                plt.close(fig)
+                return "WRBTR_H", prob_anomal, img_buf
         return None
 
 
 if __name__ == "__main__":
     reasoner = AnomalyReasoner()
-    input_str = '532375,C1,C11,C1,C75,A1,B1,910650.508962,54449.4831293'
-    d, p = reasoner.calculate_categories(input_str)
-    plot = reasoner.get_graphic(d)
+    input_str = '532375,C1,C11,C1,C75,A1,B1,910660.508962,54449.4831293'
+    d, p, img_buf_hist, img_buf_DMBTR, img_buf_WRBTR = reasoner.calculate_categories(input_str)
+    plot = reasoner.get_hist_graphic(d)
     plt.show()
 
