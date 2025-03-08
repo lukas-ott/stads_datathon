@@ -29,9 +29,20 @@ SYSTEM_PROMPT = f"""
     Mostly that are sets of discret values where the variables is not an element of or a continious interval where the variable is an element of.
     Please use the detection metrics to further detail the explanation so that the auditor knows why his value could be false that he put in.
 
+    Please replace the variable possibly leading to an anomaly with the full words and not with the abbreviation:
+    BELNR: Document Number
+    BUKRS: Company Code
+    BSCHL: Posting Key
+    HKONT: General Ledger Account
+    PRCTR: Profit Center
+    WAERS: Currency Key
+    KTOSL: General Ledger Account Key
+    DMBTR: Amount in Local Currency
+    WRBTR: Amount in Document Currency
+    
     Example:
-    1. WRBTR: The value is suspicious because it is in the interval 544E2 to 545E2. There the majority of transactions are anomalies. The probabilty of a transaction being an anomaly with this characteristic is 84%.
-    2. WAERS: The value is suspicious because it is not one of the following that contain mostly regular transactions: [C1 to C9]. Outside this set the majority of transactions are anomalies. The probabilty of a transaction being an anomaly with this characteristic is 50%.
+    1. Amount in Document Currency: The value is suspicious because it is in the interval 544E2 to 545E2. There the majority of transactions are anomalies. The probabilty of a transaction being an anomaly with this characteristic is 84%.
+    2. Currency Key: The value is suspicious because it is not one of the following that contain mostly regular transactions: [C1 to C9]. Outside this set the majority of transactions are anomalies. The probabilty of a transaction being an anomaly with this characteristic is 50%.
 """
 
 
