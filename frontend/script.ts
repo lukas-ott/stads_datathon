@@ -30,7 +30,9 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             const result = await response.json();
-            explanationBox.value = `Explanation: ${result.explanation}`;
+            explanationBox.value = `${result.explanation}`;
+
+            chartContainer.innerHTML = "";
 
             if (result.image_buf_1 !== null) {
                 const graphImg1 = document.createElement("img");
@@ -54,7 +56,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 graphImg3.style.maxWidth = "100%";
                 chartContainer.appendChild(graphImg3);
             }
-            chartContainer.innerHTML = ""; 
         } catch (error) {
             console.error("Error:", error);
             alert(error instanceof Error ? error.message : "An unknown error occurred.");
