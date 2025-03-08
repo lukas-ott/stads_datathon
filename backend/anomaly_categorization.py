@@ -60,4 +60,3 @@ anomaly_categories = {
         ]
     }
 }
-
