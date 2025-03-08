@@ -1,43 +1,60 @@
-interface Anomaly {
-    category: string;
-    explanation: string;
-}
+document.addEventListener("DOMContentLoaded", () => {
+    const processBtn = document.getElementById("processBtn") as HTMLButtonElement;
+    const csvInput = document.getElementById("csvInput") as HTMLInputElement;
+    const explanationBox = document.getElementById("explanation") as HTMLTextAreaElement;
+    const chartContainer = document.getElementById("chartContainer") as HTMLDivElement;
 
-const inputField = document.getElementById("csvInput") as HTMLInputElement;
-const processBtn = document.getElementById("processBtn") as HTMLButtonElement;
-const explanationField = document.getElementById("explanation") as HTMLTextAreaElement;
-const chartContainer = document.getElementById("chartContainer") as HTMLDivElement;
-
-// API request to backend for anomaly analysis
-async function analyzeData(csvData: string) {
-    try {
-        const response = await fetch("http://localhost:8000/analyze", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ csv_data: csvData }),
-        });
-
-        if (!response.ok) {
-            throw new Error("An error occurred while analyzing the data.");
+    processBtn.addEventListener("click", async () => {
+        const transactionNumber = csvInput.value.trim();
+        if (!transactionNumber) {
+            alert("Please enter a transaction number.");
+            return;
         }
 
-        const data = await response.json();
-        explanationField.value = `Kategorie: ${data.category}\nErklärung: ${data.explanation}`;
-        chartContainer.innerHTML = `<strong>Visualisierung der Anomalie (${data.category})</strong>`;
-    } catch (error) {
-        explanationField.value = "Fehler beim Abrufen der Anomalie-Daten.";
-        console.error(error);
-    }
-}
+        try {
+            const response = await fetch("http://127.0.0.1:8000/analyze", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ belnr: transactionNumber }),
+            });
 
-// Button-Eventlistener
-processBtn.addEventListener("click", () => {
-    const csvData = inputField.value.trim();
-    if (csvData) {
-        analyzeData(csvData);
-    } else {
-        explanationField.value = "Bitte geben Sie eine CSV-Zeile ein.";
-    }
+            if (!response.ok) {
+                switch (response.status) {
+                    case 401:
+                        throw new Error("Error 401: Unauthorized.");
+                    case 500:
+                        throw new Error("Error 500: Internal Server Error.");
+                    default:
+                        throw new Error(`Server error ${response.status}: Unexpected error.`);
+                }
+            }
+
+            const result = await response.json();
+            explanationBox.value = `Category: ${result.category}\nExplanation: ${result.explanation}`;
+
+            // Load and display the graphs
+            const graphImg1 = document.createElement("img");
+            graphImg1.src = `data:image/png;base64,${result.image_buf_1}`;
+            graphImg1.alt = "Anomaly Analysis Graph 1";
+            graphImg1.style.maxWidth = "100%";
+
+            const graphImg2 = document.createElement("img");
+            graphImg2.src = `data:image/png;base64,${result.image_buf_2}`;
+            graphImg2.alt = "Anomaly Analysis Graph 2";
+            graphImg2.style.maxWidth = "100%";
+
+            const graphImg3 = document.createElement("img");
+            graphImg3.src = `data:image/png;base64,${result.image_buf_3}`;
+            graphImg3.alt = "Anomaly Analysis Graph 3";
+            graphImg3.style.maxWidth = "100%";
+
+            chartContainer.innerHTML = ""; 
+            chartContainer.appendChild(graphImg1);
+            chartContainer.appendChild(graphImg2);
+            chartContainer.appendChild(graphImg3);
+        } catch (error) {
+            console.error("Error:", error);
+            alert(error instanceof Error ? error.message : "An unknown error occurred.");
+        }
+    });
 });

@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "lib": ["es6", "dom"],
-    "module": "commonjs",
-    "target": "es6",
+    "lib": ["ES2015", "DOM"],
+    "module": "commonjs", // or "commonjs" if your environment requires it
+    "target": "ES6",
     "outDir": "./dist",
     "rootDir": "./",  
     "strict": true,
@@ -10,6 +10,6 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["script.ts"],
+  "include": ["./**/*.ts"],
   "exclude": ["node_modules", "**/*.spec.ts"]
 }
