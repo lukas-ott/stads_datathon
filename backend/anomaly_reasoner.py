@@ -80,9 +80,9 @@ class AnomalyReasoner:
         return input.split(sep=',')
     
     def calculate_categories(self, input_str: str) -> tuple[dict[str, float], float, io.BytesIO | None, io.BytesIO | None, io.BytesIO | None]:
-        input_list = reasoner.convert_input_string(input_str)
-        d = reasoner.interpret_anomaly(input_list)
-        p = reasoner.calculate_overall_conditional_probability(d, self.df)
+        input_list = self.convert_input_string(input_str)
+        d = self.interpret_anomaly(input_list)
+        p = self.calculate_overall_conditional_probability(d, self.df)
         img_buf_DMBTR = None
         img_buf_WRBTR = None
         if 'DMBTR_L' in d.keys():
@@ -93,7 +93,7 @@ class AnomalyReasoner:
             img_buf_WRBTR = d['WRBTR_L'][1]
         if 'WRBTR_H' in d.keys():
             img_buf_WRBTR = d['WRBTR_H'][1]
-        img_buf_hist = reasoner.get_hist_graphic(d)
+        img_buf_hist = self.get_hist_graphic(d)
         return d, p, img_buf_hist, img_buf_DMBTR, img_buf_WRBTR
     
     def get_hist_graphic(self, detected_sub_anomalies: dict[str, float]) -> io.BytesIO:
