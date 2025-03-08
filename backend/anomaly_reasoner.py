@@ -16,6 +16,16 @@ class AnomalyReasoner:
         self.df = pd.read_csv('Datathon Data RSM Ebner Stolz.csv', sep=',')
         self.df['label_int'] = [int(x) for x in self.df['label'] == 'anomal']
 
+    def get_row_by_BELNR(self, BELNR: str) -> list[str] | None:
+        with open(self.csv_filename, 'r') as csv_file:
+            rows = csv.reader(csv_file, delimiter=',')
+            rows = iter(rows)
+            next(rows)
+            for row in rows:
+                if row[0] == BELNR:
+                    return row
+        return None
+
     def interpret_anomaly(self, anomaly: list) -> dict[str, float]:
         reasons = {}
         waers = self._check_WAERS(anomaly[1])
@@ -79,9 +89,8 @@ class AnomalyReasoner:
     def convert_input_string(self, input: str) -> list[str]:
         return input.split(sep=',')
     
-    def calculate_categories(self, input_str: str) -> tuple[dict[str, float], float, io.BytesIO | None, io.BytesIO | None, io.BytesIO | None]:
-        input_list = self.convert_input_string(input_str)
-        d = self.interpret_anomaly(input_list)
+    def calculate_categories(self, input: list[str]) -> tuple[dict[str, float], float, io.BytesIO | None, io.BytesIO | None, io.BytesIO | None]:
+        d = self.interpret_anomaly(input)
         p = self.calculate_overall_conditional_probability(d, self.df)
         img_buf_DMBTR = None
         img_buf_WRBTR = None
@@ -396,6 +405,7 @@ class AnomalyReasoner:
 
 if __name__ == "__main__":
     reasoner = AnomalyReasoner()
-    input_str = '370090,E00,W67,W79,T97,N82,J10,92445516.8528,59585037.0177,anomal'
-    d, p, img_buf_hist, img_buf_DMBTR, img_buf_WRBTR = reasoner.calculate_categories(input_str)
+    row1 = reasoner.get_row_by_BELNR('370090')
+    d, p, img_buf_hist, img_buf_DMBTR, img_buf_WRBTR = reasoner.calculate_categories(row1)
+    print(d)
 
