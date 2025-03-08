@@ -16,12 +16,13 @@ SYSTEM_PROMPT = """You're an auditing assistant, explaining transaction anomalie
 """
 
 
-def get_explanation(input_categories: dict[str, float]) -> str:
+def get_explanation(input_categories: dict[str, float], probability) -> str:
+    USER_PROMPT = f"""Anomaly reasons: {input_categories}; Relative probility that given the characteristics, the transaction is an anomaly: {probability}"""
     completion = openai.ChatCompletion.create(
         model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": input_categories},
+            {"role": "user", "content": USER_PROMPT},
         ],
     )
     return completion.choices[0].message["content"]
