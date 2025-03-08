@@ -3,36 +3,6 @@ import pandas as pd
 import csv
 
 
-'532375,C1,C11,C1,C75,A1,B1,910650.508962,54449.4831293,anomal'
-def calculate_overall_conditional_probability(detected_sub_anomalies, df):
-    # input is a df containing the columns as keys where the value of the data point is suspicious
-    # init mask with True and the lenght of the df
-    mask = df.index == df.index
-
-    if 'BSCHL' in detected_sub_anomalies.keys():
-        mask &= ~df['BSCHL'].isin(["A1", "A2", "A3"])
-    if 'BUKRS' in detected_sub_anomalies.keys():
-        mask &= ~df['BUKRS'].str.startswith('C')
-    if 'DMBTR' in detected_sub_anomalies.keys():
-        mask &= (df['DMBTR'] > 90E6) | ((9106E2 < df['DMBTR']) & (df['DMBTR'] < 9107E2))
-    if 'PRCTR' in detected_sub_anomalies.keys():
-        mask &= ~df['PRCTR'].str.startswith('C') 
-    if 'KTOSL' in detected_sub_anomalies.keys():
-        mask &= ~df['KTOSL'].isin([f"C{i}" for i in range(1, 10)])
-    if 'HKONT' in detected_sub_anomalies.keys():
-        mask &= ~df['HKONT'].isin(["B1", "B2", "B3"])
-    if 'WAERS' in detected_sub_anomalies.keys():
-        mask &= ~df['WAERS'].isin([f"C{i}" for i in range(1, 10)])
-    if 'WRBTR' in detected_sub_anomalies.keys():
-        mask &= (df['WRBTR'] > 5.9E7) | ((544E2 < df['WRBTR']) & (df['WRBTR'] < 545E2))
-
-    # print(len(mask[mask == True]))
-    if len(df.loc[mask]) == 0:
-        return 0
-    else:
-        return len(df.loc[mask & (df['label'] == 'anomal')]) / len(df.loc[mask])
-
-
 class AnomalyReasoner:
     def __init__(self):
         self.csv_filename = "Datathon Data RSM Ebner Stolz.csv"
@@ -66,6 +36,36 @@ class AnomalyReasoner:
             reasons[wrbtr[0]] = wrbtr[1]
 
         return reasons
+    
+    def calculate_overall_conditional_probability(self, detected_sub_anomalies: dict, df: pd.DataFrame) -> float:
+        # input is a df containing the columns as keys where the value of the data point is suspicious
+        # init mask with True and the lenght of the df
+        mask = df.index == df.index
+
+        if 'BSCHL' in detected_sub_anomalies.keys():
+            mask &= ~df['BSCHL'].isin(["A1", "A2", "A3"])
+        if 'BUKRS' in detected_sub_anomalies.keys():
+            mask &= ~df['BUKRS'].str.startswith('C')
+        if 'DMBTR' in detected_sub_anomalies.keys():
+            mask &= (df['DMBTR'] > 90E6) | ((9106E2 < df['DMBTR']) & (df['DMBTR'] < 9107E2))
+        if 'PRCTR' in detected_sub_anomalies.keys():
+            mask &= ~df['PRCTR'].str.startswith('C') 
+        if 'KTOSL' in detected_sub_anomalies.keys():
+            mask &= ~df['KTOSL'].isin([f"C{i}" for i in range(1, 10)])
+        if 'HKONT' in detected_sub_anomalies.keys():
+            mask &= ~df['HKONT'].isin(["B1", "B2", "B3"])
+        if 'WAERS' in detected_sub_anomalies.keys():
+            mask &= ~df['WAERS'].isin([f"C{i}" for i in range(1, 10)])
+        if 'WRBTR' in detected_sub_anomalies.keys():
+            mask &= (df['WRBTR'] > 5.9E7) | ((544E2 < df['WRBTR']) & (df['WRBTR'] < 545E2))
+
+        if len(df.loc[mask]) == 0:
+            return 0
+        else:
+            return len(df.loc[mask & (df['label'] == 'anomal')]) / len(df.loc[mask])
+        
+    def convert_input_string(self, input: str) -> list[str]:
+        return input.split(sep=',')
 
     def _check_WAERS(self, WAERS: str) -> tuple[str, float] | None:
         allowed_values = ["C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9"]
@@ -240,9 +240,11 @@ class AnomalyReasoner:
 if __name__ == "__main__":
     reasoner = AnomalyReasoner()
     df = pd.read_csv('Datathon Data RSM Ebner Stolz.csv', sep=',')
+    input_str = '532375,C1,C11,C1,C75,A1,B1,910650.508962,54449.4831293,anomal'
+    input_list = reasoner.convert_input_string(input)
 
-    d = reasoner.interpret_anomaly([12939, "C1", "C20", "C1", "C18", "A1", "B1", "910658.284578", "54449.8388203", "anomal"])
+    d = reasoner.interpret_anomaly(input_list)
     print(d)
-    p = calculate_overall_conditional_probability(d, df)
+    p = reasoner.calculate_overall_conditional_probability(d, df)
     print(p)
 
