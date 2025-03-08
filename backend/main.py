@@ -40,8 +40,7 @@ async def analyze(data: CSVData):
         row = anomalyReasoner.get_row_by_BELNR(data.belnr)
         results = anomalyReasoner.calculate_categories(row)
         categories, probability, *image_bufs  = results
-        explanation = "Test"
-        # explanation = get_explanation(categories, probability)
+        explanation = get_explanation(categories, probability)
         
         # Encode image buffers to base64 strings
         image_buf_1_str = base64.b64encode(image_bufs[0].getvalue()).decode('utf-8')
