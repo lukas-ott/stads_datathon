@@ -108,7 +108,6 @@ class AnomalyReasoner:
     def get_hist_graphic(self, detected_sub_anomalies: dict[str, float]) -> io.BytesIO:
         max_key = max(detected_sub_anomalies, key=detected_sub_anomalies.get)
         mask = self.df.index == self.df.index
-
         if 'BSCHL' == max_key:
             mask = ~self.df['BSCHL'].isin(["A1", "A2", "A3"])
         if 'BUKRS' == max_key:
@@ -131,7 +130,9 @@ class AnomalyReasoner:
             mask = self.df['WRBTR'] > 5.9E7
 
         fig, ax_hist = plt.subplots(figsize=(5, 5))
-        sns.histplot(self.df.loc[mask], x='label', hue='label_int', legend=False, ax=ax_hist)
+        p = sns.histplot(self.df.loc[mask], x='label', hue='label_int', legend=False, ax=ax_hist, binwidth=0.5, bins=['anormal', 'regular'], kde=False, discrete=True)
+        p.set(xlabel=max_key, ylabel='Number of transactions')
+        
         # ax.set_title(f'Histogram of labels for rows with a possible error the column with largest probability of anomaly.')
         # Add labels to each bar
         for patch in ax_hist.patches:
@@ -303,6 +304,8 @@ class AnomalyReasoner:
                 x = np.linspace(avg - 5 * sigma, avg + 5 * sigma, 100)
                 fig, ax = plt.subplots(figsize=(5, 5))
                 ax.plot(x, stats.norm.pdf(x, avg, sigma))
+                plt.xlabel('DMBTR')
+                plt.ylabel('Anormaly distribution')
                 ax.axvline(x=DMBTR, color="r")
                 img_buf = io.BytesIO()
                 plt.savefig(img_buf, format='png')
@@ -332,6 +335,8 @@ class AnomalyReasoner:
                 x = np.linspace(avg - 5 * sigma, avg + 5 * sigma, 100)
                 fig, ax = plt.subplots(figsize=(5, 5))
                 ax.plot(x, stats.norm.pdf(x, avg, sigma))
+                plt.xlabel('DMBTR')
+                plt.ylabel('Anormaly distribution')
                 ax.axvline(x=DMBTR, color="r")
                 img_buf = io.BytesIO()
                 plt.savefig(img_buf, format='png')
@@ -366,6 +371,8 @@ class AnomalyReasoner:
                 x = np.linspace(avg - 5 * sigma, avg + 5 * sigma, 100)
                 fig, ax = plt.subplots(figsize=(5, 5))
                 ax.plot(x, stats.norm.pdf(x, avg, sigma))
+                plt.xlabel('WRBTR')
+                plt.ylabel('Anormaly distribution')
                 ax.axvline(x=WRBTR, color="r")
                 img_buf = io.BytesIO()
                 plt.savefig(img_buf, format='png')
@@ -395,6 +402,8 @@ class AnomalyReasoner:
                 x = np.linspace(avg - 5 * sigma, avg + 5 * sigma, 100)
                 fig, ax = plt.subplots(figsize=(5, 5))
                 ax.plot(x, stats.norm.pdf(x, avg, sigma))
+                plt.xlabel('WRBTR')
+                plt.ylabel('Anormaly distribution')
                 ax.axvline(x=WRBTR, color="r")
                 img_buf = io.BytesIO()
                 plt.savefig(img_buf, format='png')
