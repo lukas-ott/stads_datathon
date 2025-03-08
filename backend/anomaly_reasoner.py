@@ -153,7 +153,7 @@ class AnomalyReasoner:
 
     def _check_WAERS(self, WAERS: str) -> tuple[str, float] | None:
         allowed_values = ["C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9"]
-        if not WAERS in allowed_values:
+        if WAERS not in allowed_values:
             with open(self.csv_filename, 'r') as csv_file:
                 rows = csv.reader(csv_file, delimiter=',')
                 iterrows = iter(rows)
@@ -162,7 +162,7 @@ class AnomalyReasoner:
                 anomal_counter = 0
                 regular_counter = 0
                 for row in iterrows:
-                    if not row[1] in allowed_values:
+                    if row[1] not in allowed_values:
                         if row[9] == "anomal":
                             anomal_counter += 1
                         else:
@@ -194,7 +194,7 @@ class AnomalyReasoner:
 
     def _check_KTOSL(self, KTOSL: str) -> tuple[str, float] | None:
         allowed_values = ["C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9"]
-        if not KTOSL in allowed_values:
+        if KTOSL not in allowed_values:
             with open(self.csv_filename, 'r') as csv_file:
                 rows = csv.reader(csv_file, delimiter=',')
                 iterrows = iter(rows)
@@ -203,7 +203,7 @@ class AnomalyReasoner:
                 anomal_counter = 0
                 regular_counter = 0
                 for row in iterrows:
-                    if not row[3] in allowed_values:
+                    if row[3] not in allowed_values:
                         if row[9] == "anomal":
                             anomal_counter += 1
                         else:
@@ -236,7 +236,7 @@ class AnomalyReasoner:
 
     def _check_BSCHL(self, BSCHL: str) -> tuple[str, float] | None:
         allowed_values = ["A1", "A2", "A3"]
-        if not BSCHL in allowed_values:
+        if BSCHL not in allowed_values:
             with open(self.csv_filename, 'r') as csv_file:
                 rows = csv.reader(csv_file, delimiter=',')
                 iterrows = iter(rows)
@@ -245,7 +245,7 @@ class AnomalyReasoner:
                 anomal_counter = 0
                 regular_counter = 0
                 for row in iterrows:
-                    if not row[5] in allowed_values:
+                    if row[5] not in allowed_values:
                         if row[9] == "anomal":
                             anomal_counter += 1
                         else:
@@ -257,7 +257,7 @@ class AnomalyReasoner:
 
     def _check_HKONT(self, HKONT: str) -> tuple[str, float] | None:
         allowed_values = ["B1", "B2", "B3"]
-        if not HKONT in allowed_values:
+        if HKONT not in allowed_values:
             with open(self.csv_filename, 'r') as csv_file:
                 rows = csv.reader(csv_file, delimiter=',')
                 iterrows = iter(rows)
@@ -266,7 +266,7 @@ class AnomalyReasoner:
                 anomal_counter = 0
                 regular_counter = 0
                 for row in iterrows:
-                    if not row[6] in allowed_values:
+                    if row[6] not in allowed_values:
                         if row[9] == "anomal":
                             anomal_counter += 1
                         else:

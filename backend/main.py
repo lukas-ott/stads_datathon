@@ -6,8 +6,6 @@ import base64
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import matplotlib.pyplot as plt
-from starlette.responses import Response
 from anomaly_reasoner import AnomalyReasoner
 from llm_explanation import get_explanation
 
