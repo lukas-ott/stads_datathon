@@ -61,9 +61,3 @@ anomaly_categories = {
     }
 }
 
-"""
-    
-    Hi, I am a Computer Science student and am writing an application that explains anomalies in a data set. 
-    An anomaly accurs when a row contains a strange value in one column. 
-
-"""
