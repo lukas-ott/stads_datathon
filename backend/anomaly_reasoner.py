@@ -346,7 +346,7 @@ class AnomalyReasoner:
                     if (544E2 < float(row[8]) < 545E2):
                         if row[9] == "anomal":
                             anomal_counter += 1
-                            anomalies.append(float(row[7]))
+                            anomalies.append(float(row[8]))
                         else:
                             regular_counter += 1
 
@@ -375,7 +375,7 @@ class AnomalyReasoner:
                     if float(row[8]) > 5.9E7:
                         if row[9] == "anomal":
                             anomal_counter += 1
-                            anomalies.append(float(row[7]))
+                            anomalies.append(float(row[8]))
                         else:
                             regular_counter += 1
 
@@ -396,8 +396,6 @@ class AnomalyReasoner:
 
 if __name__ == "__main__":
     reasoner = AnomalyReasoner()
-    input_str = '532375,C1,C11,C1,C75,A1,B1,910660.508962,54449.4831293'
+    input_str = '370090,E00,W67,W79,T97,N82,J10,92445516.8528,59585037.0177,anomal'
     d, p, img_buf_hist, img_buf_DMBTR, img_buf_WRBTR = reasoner.calculate_categories(input_str)
-    plot = reasoner.get_hist_graphic(d)
-    plt.show()
 
