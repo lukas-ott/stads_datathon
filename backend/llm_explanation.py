@@ -1,10 +1,11 @@
 import openai
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 import os
 
-load_dotenv(dotenv_path=".env.local")
+env_file = find_dotenv(".env.local")
+load_dotenv(env_file)
 
-api_key = os.getenv("OPENAI_API_KEY")
+api_key = os.environ.get("API_KEY")
 openai.api_key = api_key
 
 SYSTEM_PROMPT = """You're an auditing assistant, explaining transaction anomalies.
@@ -26,3 +27,17 @@ def get_explanation(input_categories: dict[str, float], probability) -> str:
         ],
     )
     return completion.choices[0].message["content"]
+
+
+
+def main():
+    input_categories = {
+        "Transaction amount is significantly higher than usual": 0.9,
+        "Transaction location is unusual": 0.7,
+    }
+    probability = 0.8
+    explanation = get_explanation(input_categories, probability)
+    print(explanation)
+    
+if __name__ == "__main__":
+    main()
