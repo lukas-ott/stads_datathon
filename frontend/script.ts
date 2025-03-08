@@ -30,28 +30,31 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             const result = await response.json();
-            explanationBox.value = `Category: ${result.category}\nExplanation: ${result.explanation}`;
+            explanationBox.value = `Explanation: ${result.explanation}`;
 
-            // Load and display the graphs
-            const graphImg1 = document.createElement("img");
-            graphImg1.src = `data:image/png;base64,${result.image_buf_1}`;
-            graphImg1.alt = "Anomaly Analysis Graph 1";
-            graphImg1.style.maxWidth = "100%";
+            if (result.image_buf_1 !== null) {
+                const graphImg1 = document.createElement("img");
+                graphImg1.src = `data:image/png;base64,${result.image_buf_1}`;
+                graphImg1.alt = "Anomaly Analysis Graph 1";
+                graphImg1.style.maxWidth = "100%";
+                chartContainer.appendChild(graphImg1);
+            }
+            if (result.image_buf_2 !== null) {
+                const graphImg2 = document.createElement("img");
+                graphImg2.src = `data:image/png;base64,${result.image_buf_2}`;
+                graphImg2.alt = "Anomaly Analysis Graph 2";
+                graphImg2.style.maxWidth = "100%";
+                chartContainer.appendChild(graphImg2);
+            }
 
-            const graphImg2 = document.createElement("img");
-            graphImg2.src = `data:image/png;base64,${result.image_buf_2}`;
-            graphImg2.alt = "Anomaly Analysis Graph 2";
-            graphImg2.style.maxWidth = "100%";
-
-            const graphImg3 = document.createElement("img");
-            graphImg3.src = `data:image/png;base64,${result.image_buf_3}`;
-            graphImg3.alt = "Anomaly Analysis Graph 3";
-            graphImg3.style.maxWidth = "100%";
-
+            if (result.image_buf_3 !== null) {
+                const graphImg3 = document.createElement("img");
+                graphImg3.src = `data:image/png;base64,${result.image_buf_3}`;
+                graphImg3.alt = "Anomaly Analysis Graph 3";
+                graphImg3.style.maxWidth = "100%";
+                chartContainer.appendChild(graphImg3);
+            }
             chartContainer.innerHTML = ""; 
-            chartContainer.appendChild(graphImg1);
-            chartContainer.appendChild(graphImg2);
-            chartContainer.appendChild(graphImg3);
         } catch (error) {
             console.error("Error:", error);
             alert(error instanceof Error ? error.message : "An unknown error occurred.");
