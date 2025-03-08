@@ -1,16 +1,12 @@
 import anomaly_categorization
 import pandas as pd
 import csv
-import matplotlib.pyplot as plt
-import seaborn as sns
 
 
 class AnomalyReasoner:
     def __init__(self):
         self.csv_filename = "Datathon Data RSM Ebner Stolz.csv"
         self.categories = anomaly_categorization.anomaly_categories
-        self.df = pd.read_csv('Datathon Data RSM Ebner Stolz.csv', sep=',')
-        self.df['label_int'] = [int(x) for x in self.df['label'] == 'anomal']
 
     def interpret_anomaly(self, anomaly: list) -> dict[str, float]:
         reasons = {}
@@ -41,7 +37,7 @@ class AnomalyReasoner:
 
         return reasons
     
-    def calculate_overall_conditional_probability(self, detected_sub_anomalies: dict[str, float], df: pd.DataFrame) -> float:
+    def calculate_overall_conditional_probability(self, detected_sub_anomalies: dict, df: pd.DataFrame) -> float:
         # input is a df containing the columns as keys where the value of the data point is suspicious
         # init mask with True and the lenght of the df
         mask = df.index == df.index
@@ -70,44 +66,6 @@ class AnomalyReasoner:
         
     def convert_input_string(self, input: str) -> list[str]:
         return input.split(sep=',')
-    
-    def calculate_categories(self, input_str: str) -> tuple[dict[str, float], float]:
-        input_list = reasoner.convert_input_string(input_str)
-        d = reasoner.interpret_anomaly(input_list)
-        p = reasoner.calculate_overall_conditional_probability(d, self.df)
-        return d, p
-    
-    def get_graphic(self, detected_sub_anomalies: dict[str, float]):
-        max_key = max(detected_sub_anomalies, key=detected_sub_anomalies.get)
-
-        mask = self.df.index == self.df.index
-
-        if 'BSCHL' == max_key:
-            mask = ~self.df['BSCHL'].isin(["A1", "A2", "A3"])
-        if 'BUKRS' == max_key:
-            mask = ~self.df['BUKRS'].str.startswith('C')
-        if 'DMBTR' == max_key:
-            mask = (self.df['DMBTR'] > 90E6) | ((9106E2 < self.df['DMBTR']) & (self.df['DMBTR'] < 9107E2))
-        if 'PRCTR' == max_key:
-            mask = ~self.df['PRCTR'].str.startswith('C') 
-        if 'KTOSL' == max_key:
-            mask = ~self.df['KTOSL'].isin([f"C{i}" for i in range(1, 10)])
-        if 'HKONT' == max_key:
-            mask = ~self.df['HKONT'].isin(["B1", "B2", "B3"])
-        if 'WAERS' == max_key:
-            mask = ~self.df['WAERS'].isin([f"C{i}" for i in range(1, 10)])
-        if 'WRBTR' == max_key:
-            mask = (self.df['WRBTR'] > 5.9E7) | ((544E2 < self.df['WRBTR']) & (self.df['WRBTR'] < 545E2))
-
-        ax = sns.histplot(self.df.loc[mask], x='label', hue='label_int')
-        # Add labels to each bar
-        for patch in ax.patches:
-            height = patch.get_height()
-            if height > 0:  # Only label non-zero bars
-                ax.text(patch.get_x() + patch.get_width() / 2, height + 1,  # Adjusted position
-                    f'{int(height)}', ha='center', fontsize=10, fontweight='bold')
-        return ax
-
 
     def _check_WAERS(self, WAERS: str) -> tuple[str, float] | None:
         allowed_values = ["C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9"]
@@ -235,7 +193,6 @@ class AnomalyReasoner:
         return None
 
 
-    # TODO: DMBTR1 für unteres Interval und DMBTR2 für oberes
     def _check_DMBTR(self, DMBTR: str) -> tuple[str, float] | None:
         DMBTR = float(DMBTR)
         if DMBTR > 9E7 or (9106E2 < DMBTR < 9107E2):
@@ -282,8 +239,12 @@ class AnomalyReasoner:
 
 if __name__ == "__main__":
     reasoner = AnomalyReasoner()
+    df = pd.read_csv('Datathon Data RSM Ebner Stolz.csv', sep=',')
     input_str = '532375,C1,C11,C1,C75,A1,B1,910650.508962,54449.4831293,anomal'
-    d, p = reasoner.calculate_categories(input_str)
-    plot = reasoner.get_graphic(d)
-    plt.show()
+    input_list = reasoner.convert_input_string(input)
+
+    d = reasoner.interpret_anomaly(input_list)
+    print(d)
+    p = reasoner.calculate_overall_conditional_probability(d, df)
+    print(p)
 
