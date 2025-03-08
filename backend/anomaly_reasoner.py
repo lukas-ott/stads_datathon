@@ -282,7 +282,7 @@ class AnomalyReasoner:
 
 if __name__ == "__main__":
     reasoner = AnomalyReasoner()
-    input_str = '532375,C1,C11,C1,C75,A1,B1,910650.508962,54449.4831293,anomal'
+    input_str = '532375,C1,C11,C1,C75,A1,B1,910650.508962,54449.4831293'
     d, p = reasoner.calculate_categories(input_str)
     plot = reasoner.get_graphic(d)
     plt.show()
